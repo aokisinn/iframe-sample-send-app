@@ -34,7 +34,7 @@ export default function Home() {
 
       if (type === 'getTheme') {
         const theme = getTheme()
-        window.postMessage({ type: 'theme', data: theme })
+        window.parent.postMessage({ type: 'theme', data: theme }, '*')
       }
 
       if (type === 'updateTheme') {
