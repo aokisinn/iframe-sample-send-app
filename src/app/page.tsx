@@ -1,95 +1,60 @@
-import Image from "next/image";
+'use client'
+
+import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
+type Theme = 'light' | 'dark'
+
 export default function Home() {
+  const [theme, setTheme] = useState<Theme | null>(null)
+
+  const setThemeLocal = (theme: Theme) => {
+    setTheme(theme)
+    localStorage.setItem('theme', theme)
+  }
+
+  useEffect(() => {
+    const localTheme = localStorage.getItem('theme') as Theme
+    setTheme(localTheme || 'light')
+
+    const getTheme = () => {
+      const theme = localStorage.getItem('theme') as Theme
+      return theme || 'light'
+    }
+
+    const updateTheme = (theme: Theme) => {
+      localStorage.setItem('theme', theme)
+    }
+
+    window.addEventListener('message', (event) => {
+      const { type, data } = event.data
+      // 本番環境では、originをチェックする
+      // 例:
+      // if (event.origin !== 'https://trusted-domain.com') return
+
+      if (type === 'getTheme') {
+        const theme = getTheme()
+        window.postMessage({ type: 'theme', data: theme })
+      }
+
+      if (type === 'updateTheme') {
+        updateTheme(data)
+      }
+    })
+  }, [])
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+        <h1 className={styles.title}>
+          Theme Send Site Now {theme}
+        </h1>
+        
+        <div>
+          <button onClick={() => setThemeLocal('light')}>Light</button>
+          <button onClick={() => setThemeLocal('dark')}>Dark</button>
         </div>
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
